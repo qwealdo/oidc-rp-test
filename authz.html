@@ -1,0 +1,18 @@
+<!doctype html><html><body><script>
+const q=new URLSearchParams(location.search);
+const ru=q.get('redirect_uri')||'https://portal.exoscale.com/sso-authenticate/sectest-qwe-aldo1-exo2';
+const nonce=q.get('nonce')||''; const state=q.get('state')||''; const cid=q.get('client_id')||'hunt-client';
+const PRIV={kty:"RSA",kid:"k1",use:"sig",alg:"RS256",n:"nWEEsfTk8VD-p2BKl_iarMkRGo_EDLbkGM7PNjPvgBQa_YYrXjc22MCpbQZdYBdkcUMQMnH-9JC-kTuuN6XV0mWbtQcL30m8L_XZSy4EyOOGos1g4QLLTf3yUGIO9znJnvY4t03VtUfKbw2C-580F87t5MNC4GIPqzWb3O41g6I8n4xRvwS59cLscoCTuIgwtTHgWRZe8IWBdqzLFHcrkh1iwyTobcsiJTtrp7_5dAR0LbKnrf7u8cfXcGCAgp7HyQlY4CgW0uOJzGcm30H1DZIhm2BRWelB8EM77_EkHHlzFaGB8xuGJFdr6FGHDoqcfIPyAjt5WepHcdoqJPBzgQ",e:"AQAB",d:"VC-9EaHHHOLbozCttnQuVmK-24HJH5c8ls8XP6kYlpL3if1m3y3G3e8-spH515h4pBd6NDUqBWAVRB6z9OCpOOgegWZ7josknlZzhPV6nPVy5OcOyk8MVXQuIzUEfHHuzZhsG0ii58GEVu0-nAtvemAfS4Uh4skrrvjGbH1tjJpt7wCkNDtYPcptAyIqc4b2dVd5-8Y6cwTrvJbReJM_xqpTLMd2__eOXhluweUfYV1Ipt5q7qICXkObziegxqG17KTLUP5TA02JEJBWRv9Jg4pqikWYCI-wfMAejlQc99Nyb0DU9eNrVaj_efaWuZgxgcFTaA84TdVh6zXieZUh",p:"zFMIETphF9ixE31k3bHCRDlzpdE1QCKJG1oDSvQgyzub0nRTVMiRiVVF77s5AQW4ZtLJOR7fgLTqt4Lw7hzTnVUbdT0CSR-THgJ-6ioA4nKC_ZxA0n2-asYeS2ic7qt9ggbyIcGx8_U0K7DMiB-Y2S0e3E34VMWhJji0PH8NSCE",q:"xS6DA3V9I1l9Wflm8qhw3TdrrVJy1v_nKsh8fGdW40kl52R79HLMHDBBwSAJDu7RZ_RoDr1jj-5sR-JhpB9qqSx_wnXTmnG04UsMOy6tM3B9h6WmGPULN4ipEabABkrhfC2QfQ-Y4XwW6RUFLAHqMVIVtBzDzORJ5xfE-5coP2E",dp:"yqwF0Yj17EB-DRYRqjH7v865Hx5w0qgvFdlocL3NlaoP-2Z1jiDQ88eI8q3kclYpPp0RCj7Mdg9-zv7sW1Rut55G-TjF_qB6Poc9Oqrla7koo8WNKv2dlq3kOOqQ19F1Ujfvj3phONrdoATkLJYi-DFgbihNDlFmctJGPcfM9eE",dq:"OH9dNq6BTpGjoxYc80ZkIF5y0dSf5w6n09BiKtsJQFKDM8vM4HvME_-Xt5hQQCEZiymybxbA4kq0Z9xrkbUWwKZpbPSJzuTpqOvx8zsqkWSX8zf5YYlEz4KuvsoCl0r5VLVRgyPm8CS4A8zsEHH0AnG8mkDrsVdv_XEIFfZ3p8E",qi:"wRC0H5xRwxkaYuv6q2Rw0dgwZyOQXgqB-cRQHA9asmK_CZ9iK5oA9u8rWTd7bS_yy2MyJUwAFz3_Du2WwTUJ6dcuH0S7lWK6NAEbBkankMMsHtQ63CWQAqqUX9pjS6DVpXZ4E9SeeINd67lKOE7aO7JvKbDMHDEo_RvZsfzJ3AU"};
+const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const H=b64u(new TextEncoder().encode(JSON.stringify({alg:"RS256",typ:"JWT",kid:"k1"})));
+const now=Math.floor(Date.now()/1000);
+const P=b64u(new TextEncoder().encode(JSON.stringify({iss:"https://qwealdo.github.io/oidc-rp-test",sub:"hunt-user-1",aud:cid,exp:now+300,iat:now,nonce:nonce,email:"qwe_aldo1+ssouser@intigriti.me",email_verified:true,preferred_username:"hunt-user-1"})));
+async function go(){
+  const key=await crypto.subtle.importKey("jwk",PRIV,{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["sign"]);
+  const sig=await crypto.subtle.sign({name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},key,new TextEncoder().encode(H+"."+P));
+  const tok=H+"."+P+"."+b64u(sig);
+  const r=ru+(ru.includes('?')?'&':'#')+"id_token="+tok+"&state="+encodeURIComponent(state)+"&code=fixedcode123";
+  document.title="IDP-REDIRECT"; location.replace(r);
+}
+go();
+</script></body></html>
